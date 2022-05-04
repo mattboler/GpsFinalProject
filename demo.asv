@@ -139,7 +139,7 @@ follower_velocities = [];
 follower_velocity_stds = [];
 
 X = zeros(12,1);
-P = diag(kron([SIGMA_POS, SIGMA_VEL, SIGMA_POS, SIGMA_VEL].^2, [1,1,1])) * 1;
+P = diag(kron([SIGMA_POS, SIGMA_VEL, SIGMA_POS, SIGMA_VEL].^2, [1,1,1])) * 25;
 
 A1_COUNT = 0;
 A2_COUNT = 0;
@@ -196,8 +196,8 @@ for i = 1 : length(MEASUREMENT_TIMES)
             [X, P] = ekf.update_GPS_follow(X, Y, P, eye(3) * SIGMA_POS^2);
         elseif flag == DELPHI_KEY
             DELPHI_COUNT = DELPHI_COUNT + 1;
-            Y = delphiRange(idx);
-            [X, P] = ekf.update_range(X, Y, P, eye(1) * SIGMA_RANGE^2);
+            %Y = delphiRange(idx);
+            %[X, P] = ekf.update_range(X, Y, P, eye(1) * SIGMA_RANGE^2);
             %Y = delphiRR(idx);
             %[X, P] = ekf.update_range_rate(X, Y, P, eye(1) * SIGMA_RANGE_RATE^2);
         end
@@ -223,16 +223,15 @@ delta_positions_ecef = leader_positions - follower_positions;
 ranges = vecnorm(delta_positions_ecef, 2, 1);
 
 a1GpsPosition_llh = ecef2lla(a1GpsPosition');
-a2GpsPosition_llh = ecef2lla(a2GpsPosition');
+a2GpsPosition_lla = ecef2lla(a2GpsPosition');
 
 figure()
 plot(times, ranges)
 hold on
 plot(estimateTime + a2GpsTime(1), rangeEstimate  + 22.324)
-scatter(drtkTime + a2GpsTime(1), drtkRPV, '.')
 scatter(delphiMeasTime, delphiRange + 22.324, '.')
-ylim([20, 100])
-legend("Estimated Ranges (Ours)", "Estimated Ranges (Trucks)", "DRTK Ranges", "Measured Ranges (Radar)")
+ylim([0, 100])
+legend("Estimated Ranges (Ours)", "Estimated Ranges (Trucks)", "Measured Ranges (Radar)")
 title("Range Estimates")
 xlabel("Time (s)")
 ylabel("Range (m)")
@@ -252,15 +251,5 @@ figure()
 geoscatter(leader_positions_llh(:, 1), leader_positions_llh(:, 2), 'Marker', '.');
 hold on
 geoscatter(a1GpsPosition_llh(:, 1), a1GpsPosition_llh(:, 2), 'Marker', '.')
-legend("EKF", "Novatel")
-title("Estimated Leader Positions")
-geobasemap satellite
-
-figure()
-geoscatter(follower_positions_llh(:, 1), follower_positions_llh(:, 2), 'Marker', '.');
-hold on
-geoscatter(a2GpsPosition_llh(:, 1), a2GpsPosition_llh(:, 2), 'Marker', '.')
-legend("EKF", "Novatel")
-title("Estimated Follower Positions")
-geobasemap satellite
+legend("")
 
