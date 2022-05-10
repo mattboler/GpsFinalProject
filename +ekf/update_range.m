@@ -8,7 +8,7 @@ function [new_X, new_P] = update_range(X, Y, P, R)
 % This offset accounts for the distance from rear of lead truck to GPS
 % receiver on lead truck as well as distance from radar to GPS receiver on
 % rear truck.
-RECEIVER_RANGE_OFFSET = 22.324;
+RECEIVER_RANGE_OFFSET = 22; %22.324;
 Y = Y + RECEIVER_RANGE_OFFSET;
 
 % Compute jacobians
@@ -24,7 +24,7 @@ z = Y - Y_hat;
 
 % Residual test
 d = sqrt( z' * inv(S) * z  );
-if d < chi2inv(0.1, length(Y))
+if d < chi2inv(0.3, length(Y))
     % Kalman Filter correction equation
     new_X = X + K*z;
     new_P = (eye(12) - K*H) * P * (eye(12) - K*H)' + K*R*K';
